@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Notification</title>
+    <style>
+        :root {
+            --primary-color: #4f46e5;
+            --primary-hover: #4338ca;
+            --background-color: #f9fafb;
+            --card-background: #ffffff;
+            --text-color: #1f2937;
+            --border-color: #e5e7eb;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.5;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+
+        .notification-container {
+            background-color: var(--card-background);
+            width: 100%;
+            max-width: 600px;
+            padding: 2rem;
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 
+                        0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        .notification-header {
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .notification-header h2 {
+            font-size: 1.875rem;
+            font-weight: 600;
+            color: var(--text-color);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            color: var(--text-color);
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            transition: border-color 0.2s ease;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 0.75rem 1.5rem;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        .btn:hover {
+            background-color: var(--primary-hover);
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 640px) {
+            .notification-container {
+                padding: 1.5rem;
+            }
+
+            .notification-header h2 {
+                font-size: 1.5rem;
+            }
+
+            .form-group {
+                margin-bottom: 1rem;
+            }
+
+            .form-group input,
+            .form-group textarea,
+            .btn {
+                padding: 0.625rem 0.875rem;
+            }
+        }
+
+        /* Add loading state */
+        .btn.loading {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        /* Success message animation */
+        @keyframes slideIn {
+            from {
+                transform: translateY(-100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .success-message {
+            position: fixed;
+            top: 1rem;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #10b981;
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 0.5rem;
+            animation: slideIn 0.3s ease-out;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="notification-container">
+        <div class="notification-header">
+            <h2>Add New Notification</h2>
+        </div>
+        <form id="notificationForm">
+            <div class="form-group">
+                <label for="title">Title</label>
+                <input 
+                    type="text" 
+                    id="title" 
+                    required 
+                    placeholder="Enter notification title"
+                >
+            </div>
+            <div class="form-group">
+                <label for="description">Description</label>
+                <textarea 
+                    id="description" 
+                    required 
+                    placeholder="Enter notification description"
+                ></textarea>
+            </div>
+            <div class="form-group">
+                <label for="link">Link (optional)</label>
+                <input 
+                    type="url" 
+                    id="link" 
+                    placeholder="https://example.com"
+                >
+            </div>
+            <button type="submit" class="btn">Add Notification</button>
+        </form>
+    </div>
+    <div id="successMessage" class="success-message">
+        Notification added successfully!
+    </div>
+
+    <script>
+        // Check if admin is logged in
+        if (!localStorage.getItem('adminLoggedIn')) {
+            window.location.href = 'admin-login.html';
+        }
+
+        const form = document.getElementById('notificationForm');
+        const submitButton = form.querySelector('button[type="submit"]');
+        const successMessage = document.getElementById('successMessage');
+
+        form.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            // Show loading state
+            submitButton.classList.add('loading');
+            submitButton.textContent = 'Adding...';
+            
+            try {
+                const notification = {
+                    title: document.getElementById('title').value.trim(),
+                    description: document.getElementById('description').value.trim(),
+                    link: document.getElementById('link').value.trim() || '#',
+                    date: new Date().toISOString()
+                };
+
+                // Simulate network delay
+                await new Promise(resolve => setTimeout(resolve, 800));
+
+                let notifications = JSON.parse(localStorage.getItem('notifications') || '[]');
+                notifications.push(notification);
+                localStorage.setItem('notifications', JSON.stringify(notifications));
+
+                // Show success message
+                successMessage.style.display = 'block';
+                
+                // Redirect after a short delay
+                setTimeout(() => {
+                    window.location.href = 'index.html';
+                }, 1500);
+
+            } catch (error) {
+                console.error('Error adding notification:', error);
+                alert('An error occurred while adding the notification. Please try again.');
+            } finally {
+                // Reset button state
+                submitButton.classList.remove('loading');
+                submitButton.textContent = 'Add Notification';
+            }
+        });
+    </script>
+</body>
+</html>
